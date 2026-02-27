@@ -5,13 +5,16 @@ from backend.services.ai_service import AIService
 from backend.ai.client import GeminiClient
 from backend.repositories.task_repository import TaskRepository
 
+from backend.services.task_service import TaskService
+
 bp = Blueprint('ideas', __name__, url_prefix='/ideas')
 
 idea_repo = IdeaRepository()
 task_repo = TaskRepository()
+task_service = TaskService(task_repo)
 idea_service = IdeaService(idea_repo)
 ai_client = GeminiClient()
-ai_service = AIService(ai_client, task_repo)
+ai_service = AIService(ai_client, task_service)
 
 @bp.route('', methods=['POST'])
 def create_idea():

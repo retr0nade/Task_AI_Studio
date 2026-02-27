@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from backend.repositories.task_repository import TaskRepository
 from backend.services.task_service import TaskService
-from backend.domain.exceptions import DomainError
+from backend.domain.exceptions import DomainException
 
 bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -32,14 +32,14 @@ def update_task_status(task_id):
         return jsonify({'error': 'status is required'}), 400
         
     try:
-        history = task_service.change_task_status(task_id, new_status, note)
+        history = task_service.transition_task(task_id, new_status, note)
         return jsonify({
             'message': 'Status updated successfully',
             'task_id': history.task_id,
             'from_status': history.from_status,
             'to_status': history.to_status
         }), 200
-    except DomainError as e:
+    except DomainException as e:
         return jsonify({'error': str(e)}), 400
     except ValueError as e:
         return jsonify({'error': str(e)}), 404

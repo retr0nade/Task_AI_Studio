@@ -2,9 +2,9 @@ from .exceptions import InvalidTransitionError, MissingAcceptanceCriteriaError
 
 VALID_TRANSITIONS = {
     'draft': ['planned'],
-    'planned': ['draft', 'in_progress'],
-    'in_progress': ['planned', 'done'],
-    'done': ['in_progress']
+    'planned': ['in_progress'],
+    'in_progress': ['done'],
+    'done': ['planned']
 }
 
 def validate_task_transition(task, new_status: str):

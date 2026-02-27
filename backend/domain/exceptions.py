@@ -1,8 +1,11 @@
-class DomainError(Exception):
+class DomainException(Exception):
     pass
 
-class InvalidTransitionError(DomainError):
+class InvalidTransitionError(DomainException):
     pass
 
-class MissingAcceptanceCriteriaError(DomainError):
+class MissingAcceptanceCriteriaError(DomainException):
+    pass
+
+class AIValidationException(DomainException):
     pass
