@@ -1,21 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from pydantic import BaseModel, ValidationError
-from backend.repositories.idea_repository import IdeaRepository
-from backend.services.idea_service import IdeaService
-from backend.services.ai_service import AIService
-from backend.ai.client import GeminiClient
-from backend.repositories.task_repository import TaskRepository
-from backend.services.task_service import TaskService
 from backend.domain.exceptions import AIValidationException
 
 bp = Blueprint('ideas', __name__, url_prefix='/ideas')
-
-idea_repo = IdeaRepository()
-task_repo = TaskRepository()
-task_service = TaskService(task_repo)
-idea_service = IdeaService(idea_repo)
-ai_client = GeminiClient()
-ai_service = AIService(ai_client, task_service)
 
 class CreateIdeaRequest(BaseModel):
     title: str
@@ -36,6 +23,9 @@ def create_idea():
     except ValidationError as e:
         return error_response(f"Validation Error: {e.errors()}", 400)
         
+    idea_service = current_app.container['idea_service']
+    ai_service = current_app.container['ai_service']
+        
     try:
         idea = idea_service.create_idea(req.title, req.description)
         return success_response({
@@ -49,6 +39,7 @@ def create_idea():
 
 @bp.route('', methods=['GET'])
 def list_ideas():
+    idea_service = current_app.container['idea_service']
     try:
         ideas = idea_service.list_ideas()
         return success_response([{
@@ -64,6 +55,7 @@ def list_ideas():
 
 @bp.route('/<int:idea_id>', methods=['GET'])
 def get_idea(idea_id):
+    idea_service = current_app.container['idea_service']
     try:
         idea = idea_service.get_idea(idea_id)
         if not idea:
@@ -81,6 +73,8 @@ def get_idea(idea_id):
 
 @bp.route('/<int:idea_id>/generate-tasks', methods=['POST'])
 def generate_tasks(idea_id):
+    idea_service = current_app.container['idea_service']
+    ai_service = current_app.container['ai_service']
     try:
         idea = idea_service.get_idea(idea_id)
         if not idea:

@@ -9,7 +9,7 @@ class GeminiClient:
             raise ValueError("GEMINI_API_KEY environment variable is not set")
             
         genai.configure(api_key=api_key)
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "models/gemini-2.5-flash"
         self.model = genai.GenerativeModel(self.model_name)
         
     def generate_tasks_from_idea(self, title: str, description: str) -> str:

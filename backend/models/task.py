@@ -4,7 +4,7 @@ from backend.utils.datetime_utils import utc_now
 class Task(db.Model):
     __tablename__ = 'tasks'
 
-    id = db.Column(db.Integer, primary key=True)
+    id = db.Column(db.Integer, primary_key=True)
     idea_id = db.Column(db.Integer, db.ForeignKey('ideas.id'), nullable=False, index=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)

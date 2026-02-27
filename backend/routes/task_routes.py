@@ -1,13 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from pydantic import BaseModel, ValidationError
-from backend.repositories.task_repository import TaskRepository
-from backend.services.task_service import TaskService
 from backend.domain.exceptions import DomainException
 
 bp = Blueprint('tasks', __name__, url_prefix='/tasks')
-
-task_repo = TaskRepository()
-task_service = TaskService(task_repo)
 
 class CreateTaskRequest(BaseModel):
     idea_id: int
@@ -34,6 +29,7 @@ def create_task():
     except ValidationError as e:
         return error_response(f"Validation Error: {e.errors()}", 400)
         
+    task_service = current_app.container['task_service']
     try:
         task = task_service.create_task(
             idea_id=req.idea_id,
@@ -54,6 +50,7 @@ def create_task():
 
 @bp.route('/idea/<int:idea_id>', methods=['GET'])
 def get_tasks_for_idea(idea_id):
+    task_service = current_app.container['task_service']
     try:
         tasks = task_service.get_tasks_for_idea(idea_id)
         return success_response([{
@@ -77,6 +74,7 @@ def update_task_status(task_id):
     except ValidationError as e:
         return error_response(f"Validation Error: {e.errors()}", 400)
         
+    task_service = current_app.container['task_service']
     try:
         history = task_service.transition_task(task_id, req.status, req.note)
         return success_response({
