@@ -1,9 +1,16 @@
 import json
+import re
 from backend.domain.exceptions import AIValidationException
 
 def validate_ai_task_response(raw_response: str) -> dict:
+    # Strip markdown formatting like ```json ... ``` or just ``` ... ```
+    cleaned_response = raw_response.strip()
+    match = re.search(r"```(?:json)?(.*?)```", cleaned_response, re.DOTALL)
+    if match:
+        cleaned_response = match.group(1).strip()
+        
     try:
-        data = json.loads(raw_response)
+        data = json.loads(cleaned_response)
     except json.JSONDecodeError as e:
         raise AIValidationException(f"Invalid JSON format: {str(e)}")
         
