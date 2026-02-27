@@ -4,6 +4,8 @@ from backend.ai.client import GeminiClient
 from backend.ai.schema_validator import validate_ai_task_response
 from backend.models.idea import Idea
 from backend.models.task import Task
+from backend.models.ai_log import AILog
+from backend.extensions import db
 from backend.services.task_service import TaskService
 from backend.domain.exceptions import AIValidationException
 
@@ -21,13 +23,28 @@ class AIService:
             attempts += 1
             try:
                 # 1. Call generate_tasks_from_idea()
-                raw_response = self.ai_client.generate_tasks_from_idea(idea.title, idea.description)
+                prompt, raw_response = self.ai_client.generate_tasks_from_idea(idea.title, idea.description)
                 
-                # 2. Validate using schema_validator
-                validated_data = validate_ai_task_response(raw_response)
+                # Log to DB (success or parsing failure, we still got an API response)
+                log_entry = AILog(
+                    idea_id=idea.id,
+                    endpoint=self.ai_client.model_name,
+                    prompt=prompt,
+                    raw_response=raw_response
+                )
+                db.session.add(log_entry)
+                
+                try:
+                    # 2. Validate using schema_validator
+                    validated_data = validate_ai_task_response(raw_response)
+                except AIValidationException as parse_err:
+                    log_entry.error_message = str(parse_err)
+                    db.session.commit()
+                    raise parse_err
                 
                 # Success. Log the execution.
                 logging.info(f"AI task generation succeeded for idea {idea.id}")
+                db.session.commit()
                 
                 # 3. Return structured tasks to TaskService
                 return self.task_service.regenerate_ai_tasks(idea.id, validated_data["tasks"])
