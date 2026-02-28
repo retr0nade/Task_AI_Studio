@@ -12,3 +12,11 @@ class IdeaRepository:
 
     def list_all(self) -> list[Idea]:
         return db.session.query(Idea).order_by(Idea.created_at.desc()).all()
+
+    def update(self, idea: Idea) -> Idea:
+        db.session.commit()
+        return idea
+
+    def delete(self, idea: Idea) -> None:
+        db.session.delete(idea)
+        db.session.commit()

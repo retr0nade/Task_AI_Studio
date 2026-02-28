@@ -8,6 +8,10 @@ class CreateIdeaRequest(BaseModel):
     title: str
     description: str
 
+class UpdateIdeaRequest(BaseModel):
+    title: str
+    description: str
+
 def success_response(data, status_code=200):
     return jsonify({"success": True, "data": data, "error": None}), status_code
 
@@ -68,6 +72,40 @@ def get_idea(idea_id):
             'status': idea.status,
             'created_at': idea.created_at.isoformat() if idea.created_at else None
         }, 200)
+    except Exception as e:
+        return error_response(str(e), 500)
+
+@bp.route('/<int:idea_id>', methods=['PATCH'])
+def update_idea(idea_id):
+    try:
+        data = request.json or {}
+        req = UpdateIdeaRequest(**data)
+    except ValidationError as e:
+        return error_response(f"Validation Error: {e.errors()}", 400)
+        
+    idea_service = current_app.container['idea_service']
+    try:
+        idea = idea_service.update_idea(idea_id, req.title, req.description)
+        return success_response({
+            'id': idea.id,
+            'title': idea.title,
+            'description': idea.description,
+            'status': idea.status,
+            'created_at': idea.created_at.isoformat() if idea.created_at else None
+        }, 200)
+    except ValueError as e:
+        return error_response(str(e), 404)
+    except Exception as e:
+        return error_response(str(e), 500)
+
+@bp.route('/<int:idea_id>', methods=['DELETE'])
+def delete_idea(idea_id):
+    idea_service = current_app.container['idea_service']
+    try:
+        idea_service.delete_idea(idea_id)
+        return success_response(None, 204)
+    except ValueError as e:
+        return error_response(str(e), 404)
     except Exception as e:
         return error_response(str(e), 500)
 

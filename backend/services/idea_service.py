@@ -14,3 +14,19 @@ class IdeaService:
 
     def list_ideas(self) -> list[Idea]:
         return self.repository.list_all()
+
+    def update_idea(self, idea_id: int, title: str, description: str) -> Idea:
+        idea = self.repository.get_by_id(idea_id)
+        if not idea:
+            raise ValueError(f"Idea {idea_id} not found")
+        
+        idea.title = title
+        idea.description = description
+        return self.repository.update(idea)
+
+    def delete_idea(self, idea_id: int) -> None:
+        idea = self.repository.get_by_id(idea_id)
+        if not idea:
+            raise ValueError(f"Idea {idea_id} not found")
+            
+        self.repository.delete(idea)

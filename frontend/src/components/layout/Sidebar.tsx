@@ -1,10 +1,50 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useIdeas } from '../../hooks/useIdeas';
+import { Idea } from '../../types/idea';
+import { IdeaModal } from '../IdeaModal';
+import { useToast } from '../ToastProvider';
 
 export const Sidebar: React.FC = () => {
     const location = useLocation();
-    const { ideas, loading, error } = useIdeas();
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+    const { ideas, loading, error, updateIdea, deleteIdea } = useIdeas();
+
+    const [isIdeaModalOpen, setIsIdeaModalOpen] = useState(false);
+    const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
+
+    const handleEditIdea = (idea: Idea, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setEditingIdea(idea);
+        setIsIdeaModalOpen(true);
+    };
+
+    const handleDeleteIdea = async (idea: Idea, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (window.confirm(`Are you sure you want to delete "${idea.title}"? This will permanently delete all associated tasks and history.`)) {
+            try {
+                await deleteIdea(idea.id);
+                showToast('Idea deleted successfully', 'success');
+                // If we are currently viewing the deleted idea, redirect to home
+                if (location.pathname.startsWith(`/ideas/${idea.id}`)) {
+                    navigate('/ideas');
+                }
+            } catch (err) {
+                showToast('Failed to delete idea', 'error');
+            }
+        }
+    };
+
+    const handleModalSubmit = async (title: string, description: string) => {
+        if (editingIdea) {
+            await updateIdea(editingIdea.id, title, description);
+            showToast('Idea updated successfully', 'success');
+        }
+    };
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 shadow-sm h-full flex flex-col">
@@ -48,12 +88,28 @@ export const Sidebar: React.FC = () => {
                                 <li key={idea.id}>
                                     <Link
                                         to={`/ideas/${idea.id}`}
-                                        className={`block px-3 py-2 rounded-md transition-colors truncate text-sm ${isActive
-                                                ? 'bg-blue-50 text-blue-700 font-medium'
-                                                : 'text-gray-700 hover:bg-gray-50'
+                                        className={`flex items-center justify-between group px-3 py-2 rounded-md transition-colors text-sm ${isActive
+                                            ? 'bg-blue-50 text-blue-700 font-medium'
+                                            : 'text-gray-700 hover:bg-gray-50'
                                             }`}
                                     >
-                                        {idea.title}
+                                        <span className="truncate pr-2">{idea.title}</span>
+                                        <div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
+                                            <button
+                                                onClick={(e) => handleEditIdea(idea, e)}
+                                                className="p-1 text-gray-400 hover:text-blue-600 rounded"
+                                                title="Edit Idea"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                            </button>
+                                            <button
+                                                onClick={(e) => handleDeleteIdea(idea, e)}
+                                                className="p-1 text-gray-400 hover:text-red-600 rounded"
+                                                title="Delete Idea"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </div>
                                     </Link>
                                 </li>
                             );
@@ -61,6 +117,13 @@ export const Sidebar: React.FC = () => {
                     </ul>
                 )}
             </nav>
+
+            <IdeaModal
+                isOpen={isIdeaModalOpen}
+                onClose={() => setIsIdeaModalOpen(false)}
+                initialData={editingIdea || undefined}
+                onSubmit={handleModalSubmit}
+            />
         </aside>
     );
 };

@@ -50,5 +50,35 @@ export const useIdeas = () => {
         }
     };
 
-    return { ideas, loading, isCreating, error, createIdea, refetch: fetchIdeas };
+    const updateIdea = async (ideaId: number, title: string, description: string): Promise<Idea> => {
+        try {
+            setError(null);
+            const updatedIdea = await apiRequest<Idea>(`/api/ideas/${ideaId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ title, description }),
+            });
+            window.dispatchEvent(new Event('ideas-updated'));
+            return updatedIdea;
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to update idea';
+            setError(msg);
+            throw new Error(msg);
+        }
+    };
+
+    const deleteIdea = async (ideaId: number): Promise<void> => {
+        try {
+            setError(null);
+            await apiRequest(`/api/ideas/${ideaId}`, {
+                method: 'DELETE',
+            });
+            window.dispatchEvent(new Event('ideas-updated'));
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to delete idea';
+            setError(msg);
+            throw new Error(msg);
+        }
+    };
+
+    return { ideas, loading, isCreating, error, createIdea, updateIdea, deleteIdea, refetch: fetchIdeas };
 };

@@ -11,7 +11,9 @@ def make_request(method, path, data=None):
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req) as response:
-            return response.status, json.loads(response.read().decode())
+            status = response.status
+            body = response.read().decode()
+            return status, json.loads(body) if body else None
     except urllib.error.HTTPError as e:
         return e.code, json.loads(e.read().decode())
 
@@ -67,6 +69,22 @@ def run_tests():
     assert status == 200, f"Expected 200 for PUT update, got {status} {resp}"
     assert resp["data"]["title"] == "Updated Manual Task", "Did not update title properly"
     print(f"   YES. Task successfully updated: {json.dumps(resp['data'])}\n")
+
+    print("9. Update idea (PATCH) works?")
+    status, resp = make_request("PATCH", f"/ideas/{idea_id}", {"title": "Updated Idea Title", "description": "Updated Idea description."})
+    assert status == 200, f"Expected 200 for PATCH idea update, got {status} {resp}"
+    assert resp["data"]["title"] == "Updated Idea Title", "Did not update idea title properly"
+    print(f"   YES. Idea successfully updated: {json.dumps(resp['data'])}\n")
+    
+    print("10. Delete idea (DELETE) works and cascades?")
+    status, resp = make_request("DELETE", f"/ideas/{idea_id}")
+    assert status == 204, f"Expected 204 No Content for DELETE idea, got {status} {resp}"
+    print(f"   YES. Idea deleted successfully.\n")
+    
+    # Verify Idea is gone
+    status, resp = make_request("GET", f"/ideas/{idea_id}")
+    assert status == 404, f"Expected 404 Not Found after deletion, got {status} {resp}"
+    print("   YES. Idea confirmed deleted via GET /ideas/<id> returning 404.")
     
     print("========================================")
     print("ALL E2E CHECKS PASSED SUCCESSFULLY! 🎉")
