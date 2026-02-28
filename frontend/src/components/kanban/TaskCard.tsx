@@ -4,9 +4,10 @@ import { Task, TaskStatus } from '../../types/task';
 interface TaskCardProps {
     task: Task;
     onTransition: (taskId: number, ideaId: number, newStatus: TaskStatus) => Promise<void>;
+    onSelectTask: (task: Task) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition, onSelectTask }) => {
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     const handleTransition = async (newStatus: TaskStatus) => {
@@ -35,7 +36,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition }) => {
     };
 
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col group">
+        <div
+            onClick={() => onSelectTask(task)}
+            className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col group cursor-pointer"
+        >
             <div className="flex justify-between items-start mb-2">
                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${task.is_ai_generated ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
                     }`}>
@@ -59,7 +63,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition }) => {
                 </div>
             )}
 
-            <div className="mt-auto pt-1">
+            <div className="mt-auto pt-1" onClick={(e) => e.stopPropagation()}>
                 {renderTransitionButton()}
             </div>
         </div>

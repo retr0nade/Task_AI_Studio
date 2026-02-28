@@ -4,6 +4,8 @@ import { Idea } from '../types/idea';
 import { apiRequest } from '../api/client';
 import { useTasks } from '../hooks/useTasks';
 import { KanbanBoard } from '../components/kanban/KanbanBoard';
+import { TaskHistoryPanel } from '../components/history/TaskHistoryPanel';
+import { Task } from '../types/task';
 
 export const IdeaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -13,6 +15,14 @@ export const IdeaDetailPage: React.FC = () => {
     const [ideaError, setIdeaError] = useState<string | null>(null);
 
     const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask } = useTasks();
+
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+    const handleSelectTask = (task: Task) => {
+        setSelectedTask(task);
+        setIsPanelOpen(true);
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -82,7 +92,7 @@ export const IdeaDetailPage: React.FC = () => {
                 {tasksLoading ? (
                     <div className="text-gray-500 p-4">Loading tasks...</div>
                 ) : hasTasks ? (
-                    <KanbanBoard tasks={tasks} onTransition={transitionTask} />
+                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} />
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
                         <p>No tasks generated yet.</p>
@@ -90,6 +100,12 @@ export const IdeaDetailPage: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            <TaskHistoryPanel
+                task={selectedTask}
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+            />
         </div>
     );
 };
