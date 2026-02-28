@@ -89,5 +89,12 @@ class TaskService:
         
         return self.repository.update(task)
 
+    def delete_task(self, task_id: int) -> None:
+        task = self.repository.get_by_id(task_id)
+        if not task:
+            raise ValueError(f"Task {task_id} not found")
+        
+        self.repository.delete(task)
+
     def get_task_history(self, task_id: int) -> list[TaskHistory]:
         return self.repository.get_history_by_task_id(task_id)

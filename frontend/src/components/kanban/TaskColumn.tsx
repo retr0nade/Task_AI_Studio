@@ -9,9 +9,10 @@ interface TaskColumnProps {
     onTransition: (taskId: number, ideaId: number, newStatus: TaskStatus) => Promise<void>;
     onSelectTask: (task: Task) => void;
     onEditTask: (task: Task) => void;
+    onDeleteTask: (task: Task) => void;
 }
 
-export const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, tasks, onTransition, onSelectTask, onEditTask }) => {
+export const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, tasks, onTransition, onSelectTask, onEditTask, onDeleteTask }) => {
     return (
         <div className="w-80 min-w-80 bg-gray-100 rounded-lg p-3 flex flex-col gap-3" data-status={status}>
             <div className="flex justify-between items-center mb-1">
@@ -25,7 +26,7 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, tasks, on
                 {tasks.length === 0 ? (
                     <p className="text-sm text-gray-400 italic text-center mt-4 border-2 border-dashed border-gray-200 rounded-lg p-4">Empty</p>
                 ) : (
-                    tasks.map(task => <TaskCard key={task.id} task={task} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} />)
+                    tasks.map(task => <TaskCard key={task.id} task={task} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />)
                 )}
             </div>
         </div>

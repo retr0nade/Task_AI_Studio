@@ -98,6 +98,17 @@ def update_task(task_id):
     except Exception as e:
         return error_response(str(e), 500)
 
+@bp.route('/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task_service = current_app.container['task_service']
+    try:
+        task_service.delete_task(task_id)
+        return success_response(None, 204)
+    except ValueError as e:
+        return error_response(str(e), 404)
+    except Exception as e:
+        return error_response(str(e), 500)
+
 @bp.route('/<int:task_id>/history', methods=['GET'])
 def get_task_history(task_id):
     task_service = current_app.container['task_service']

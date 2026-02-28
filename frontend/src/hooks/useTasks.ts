@@ -110,5 +110,21 @@ export const useTasks = () => {
         }
     };
 
-    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks, transitionTask, createTask, updateTask };
+    const deleteTask = async (taskId: number, ideaId: number) => {
+        try {
+            setError(null);
+            await apiRequest(`/tasks/${taskId}`, {
+                method: 'DELETE'
+            });
+            await fetchTasks(ideaId.toString());
+            showToast('Task deleted successfully', 'success');
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to delete task';
+            setError(msg);
+            showToast(msg, 'error');
+            throw err;
+        }
+    };
+
+    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks, transitionTask, createTask, updateTask, deleteTask };
 };

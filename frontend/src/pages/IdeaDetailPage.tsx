@@ -15,7 +15,7 @@ export const IdeaDetailPage: React.FC = () => {
     const [ideaLoading, setIdeaLoading] = useState<boolean>(true);
     const [ideaError, setIdeaError] = useState<string | null>(null);
 
-    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask, createTask, updateTask } = useTasks();
+    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask, createTask, updateTask, deleteTask } = useTasks();
 
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -45,6 +45,13 @@ export const IdeaDetailPage: React.FC = () => {
             await updateTask(editingTask.id, parseInt(id), title, description, acceptanceCriteria);
         } else {
             await createTask(parseInt(id), title, description, acceptanceCriteria);
+        }
+    };
+
+    const handleDeleteTask = async (task: Task) => {
+        if (!id) return;
+        if (window.confirm(`Are you sure you want to delete "${task.title}"?`)) {
+            await deleteTask(task.id, parseInt(id));
         }
     };
 
@@ -116,7 +123,7 @@ export const IdeaDetailPage: React.FC = () => {
                 {tasksLoading ? (
                     <div className="text-gray-500 p-4">Loading tasks...</div>
                 ) : hasTasks ? (
-                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} onNewTask={handleNewTask} onEditTask={handleEditTask} />
+                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} onNewTask={handleNewTask} onEditTask={handleEditTask} onDeleteTask={handleDeleteTask} />
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
                         <p>No tasks generated yet.</p>

@@ -19,6 +19,11 @@ export async function apiRequest<T>(
         },
     });
 
+    // If 204 No Content, return null successfully immediately
+    if (response.status === 204) {
+        return null as unknown as T;
+    }
+
     // Attempt to parse strictly typed JSON regardless of HTTP status
     let responseData: ApiResponse<T>;
     try {

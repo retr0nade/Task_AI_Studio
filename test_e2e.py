@@ -69,8 +69,13 @@ def run_tests():
     assert status == 200, f"Expected 200 for PUT update, got {status} {resp}"
     assert resp["data"]["title"] == "Updated Manual Task", "Did not update title properly"
     print(f"   YES. Task successfully updated: {json.dumps(resp['data'])}\n")
+    
+    print("9. Delete task (DELETE) works?")
+    status, resp = make_request("DELETE", f"/tasks/{manual_task_id}")
+    assert status == 204, f"Expected 204 No Content for DELETE task, got {status} {resp}"
+    print(f"   YES. Task deleted successfully.\n")
 
-    print("9. Update idea (PATCH) works?")
+    print("10. Update idea (PATCH) works?")
     status, resp = make_request("PATCH", f"/ideas/{idea_id}", {"title": "Updated Idea Title", "description": "Updated Idea description."})
     assert status == 200, f"Expected 200 for PATCH idea update, got {status} {resp}"
     assert resp["data"]["title"] == "Updated Idea Title", "Did not update idea title properly"

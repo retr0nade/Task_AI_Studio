@@ -8,9 +8,10 @@ interface KanbanBoardProps {
     onSelectTask: (task: Task) => void;
     onNewTask: () => void;
     onEditTask: (task: Task) => void;
+    onDeleteTask: (task: Task) => void;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTransition, onSelectTask, onNewTask, onEditTask }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTransition, onSelectTask, onNewTask, onEditTask, onDeleteTask }) => {
     // Group tasks strictly by status
     const groupedTasks = useMemo(() => {
         const groups: Record<TaskStatus, Task[]> = {
@@ -47,10 +48,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTransition, o
                 </button>
             </div>
             <div className="flex-1 flex gap-4 overflow-x-auto p-4 h-full bg-gray-50 rounded-b-lg">
-                <TaskColumn title="Draft" status="draft" tasks={groupedTasks.draft} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} />
-                <TaskColumn title="Planned" status="planned" tasks={groupedTasks.planned} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} />
-                <TaskColumn title="In Progress" status="in_progress" tasks={groupedTasks.in_progress} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} />
-                <TaskColumn title="Done" status="done" tasks={groupedTasks.done} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} />
+                <TaskColumn title="Draft" status="draft" tasks={groupedTasks.draft} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
+                <TaskColumn title="Planned" status="planned" tasks={groupedTasks.planned} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
+                <TaskColumn title="In Progress" status="in_progress" tasks={groupedTasks.in_progress} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
+                <TaskColumn title="Done" status="done" tasks={groupedTasks.done} onTransition={onTransition} onSelectTask={onSelectTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask} />
             </div>
         </div>
     );
