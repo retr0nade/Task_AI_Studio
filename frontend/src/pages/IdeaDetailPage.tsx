@@ -6,6 +6,7 @@ import { useTasks } from '../hooks/useTasks';
 import { KanbanBoard } from '../components/kanban/KanbanBoard';
 import { TaskHistoryPanel } from '../components/history/TaskHistoryPanel';
 import { Task } from '../types/task';
+import { TaskModal } from '../components/TaskModal';
 
 export const IdeaDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,14 +15,37 @@ export const IdeaDetailPage: React.FC = () => {
     const [ideaLoading, setIdeaLoading] = useState<boolean>(true);
     const [ideaError, setIdeaError] = useState<string | null>(null);
 
-    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask } = useTasks();
+    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask, createTask, updateTask } = useTasks();
 
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+    // Modal state
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+
     const handleSelectTask = (task: Task) => {
         setSelectedTask(task);
         setIsPanelOpen(true);
+    };
+
+    const handleNewTask = () => {
+        setEditingTask(null);
+        setIsTaskModalOpen(true);
+    };
+
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+        setIsTaskModalOpen(true);
+    };
+
+    const handleTaskSubmit = async (title: string, description: string, acceptanceCriteria: string | null) => {
+        if (!id) return;
+        if (editingTask) {
+            await updateTask(editingTask.id, parseInt(id), title, description, acceptanceCriteria);
+        } else {
+            await createTask(parseInt(id), title, description, acceptanceCriteria);
+        }
     };
 
     useEffect(() => {
@@ -92,7 +116,7 @@ export const IdeaDetailPage: React.FC = () => {
                 {tasksLoading ? (
                     <div className="text-gray-500 p-4">Loading tasks...</div>
                 ) : hasTasks ? (
-                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} />
+                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} onNewTask={handleNewTask} onEditTask={handleEditTask} />
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
                         <p>No tasks generated yet.</p>
@@ -105,6 +129,13 @@ export const IdeaDetailPage: React.FC = () => {
                 task={selectedTask}
                 isOpen={isPanelOpen}
                 onClose={() => setIsPanelOpen(false)}
+            />
+
+            <TaskModal
+                isOpen={isTaskModalOpen}
+                onClose={() => setIsTaskModalOpen(false)}
+                initialData={editingTask || undefined}
+                onSubmit={handleTaskSubmit}
             />
         </div>
     );

@@ -62,6 +62,12 @@ def run_tests():
     # Hard to mock without changing code, but we can see the code in idea_routes.py Line 83 specifically handles AIValidationException and returns 502.
     print("   YES. Verified in code: `idea_routes.py` line 83 explicitly catches `AIValidationException` and returns 502.\n")
     
+    print("8. Update task (PUT) works?")
+    status, resp = make_request("PUT", f"/tasks/{manual_task_id}", {"title": "Updated Manual Task", "description": "This task was edited.", "acceptance_criteria": "Done"})
+    assert status == 200, f"Expected 200 for PUT update, got {status} {resp}"
+    assert resp["data"]["title"] == "Updated Manual Task", "Did not update title properly"
+    print(f"   YES. Task successfully updated: {json.dumps(resp['data'])}\n")
+    
     print("========================================")
     print("ALL E2E CHECKS PASSED SUCCESSFULLY! 🎉")
     print("========================================")

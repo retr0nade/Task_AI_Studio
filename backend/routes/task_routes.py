@@ -10,6 +10,11 @@ class CreateTaskRequest(BaseModel):
     description: str
     acceptance_criteria: str | None = None
     
+class UpdateTaskRequest(BaseModel):
+    title: str
+    description: str
+    acceptance_criteria: str | None = None
+
 class TransitionTaskRequest(BaseModel):
     status: str
     note: str | None = None
@@ -63,6 +68,33 @@ def get_tasks_for_idea(idea_id):
             'is_ai_generated': t.is_ai_generated,
             'created_at': t.created_at.isoformat() if t.created_at else None
         } for t in tasks], 200)
+    except Exception as e:
+        return error_response(str(e), 500)
+
+@bp.route('/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    try:
+        data = request.json or {}
+        req = UpdateTaskRequest(**data)
+    except ValidationError as e:
+        return error_response(f"Validation Error: {e.errors()}", 400)
+        
+    task_service = current_app.container['task_service']
+    try:
+        task = task_service.update_task(
+            task_id=task_id,
+            title=req.title,
+            description=req.description,
+            acceptance_criteria=req.acceptance_criteria
+        )
+        return success_response({
+            'id': task.id,
+            'title': task.title,
+            'description': task.description,
+            'status': task.status
+        }, 200)
+    except ValueError as e:
+        return error_response(str(e), 404)
     except Exception as e:
         return error_response(str(e), 500)
 

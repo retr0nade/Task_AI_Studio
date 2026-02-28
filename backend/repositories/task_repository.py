@@ -26,6 +26,10 @@ class TaskRepository:
         db.session.add(history)
         db.session.commit()
         
+    def update(self, task: Task):
+        db.session.commit()
+        return task
+        
     def delete(self, task: Task):
         db.session.delete(task)
         db.session.commit()

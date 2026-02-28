@@ -65,5 +65,50 @@ export const useTasks = () => {
         }
     };
 
-    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks, transitionTask };
+    const createTask = async (ideaId: number, title: string, description: string, acceptanceCriteria: string | null) => {
+        try {
+            setError(null);
+            const newTask = await apiRequest<Task>('/tasks', {
+                method: 'POST',
+                body: JSON.stringify({
+                    idea_id: ideaId,
+                    title,
+                    description,
+                    acceptance_criteria: acceptanceCriteria
+                })
+            });
+            await fetchTasks(ideaId.toString());
+            showToast('Task created successfully', 'success');
+            return newTask;
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to create task';
+            setError(msg);
+            showToast(msg, 'error');
+            throw err;
+        }
+    };
+
+    const updateTask = async (taskId: number, ideaId: number, title: string, description: string, acceptanceCriteria: string | null) => {
+        try {
+            setError(null);
+            const updatedTask = await apiRequest<Task>(`/tasks/${taskId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    title,
+                    description,
+                    acceptance_criteria: acceptanceCriteria
+                })
+            });
+            await fetchTasks(ideaId.toString());
+            showToast('Task updated successfully', 'success');
+            return updatedTask;
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to update task';
+            setError(msg);
+            showToast(msg, 'error');
+            throw err;
+        }
+    };
+
+    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks, transitionTask, createTask, updateTask };
 };

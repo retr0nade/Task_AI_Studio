@@ -5,9 +5,10 @@ interface TaskCardProps {
     task: Task;
     onTransition: (taskId: number, ideaId: number, newStatus: TaskStatus) => Promise<void>;
     onSelectTask: (task: Task) => void;
+    onEditTask: (task: Task) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition, onSelectTask }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition, onSelectTask, onEditTask }) => {
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     const handleTransition = async (newStatus: TaskStatus) => {
@@ -41,13 +42,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition, onSelect
             className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col group cursor-pointer"
         >
             <div className="flex justify-between items-start mb-2">
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${task.is_ai_generated ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
-                    {task.is_ai_generated ? 'AI' : 'Manual'}
-                </span>
-                <span className="text-[10px] font-medium text-gray-400 capitalize bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
-                    {task.status.replace('_', ' ')}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${task.is_ai_generated ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                        {task.is_ai_generated ? 'AI' : 'Manual'}
+                    </span>
+                    <span className="text-[10px] font-medium text-gray-400 capitalize bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                        {task.status.replace('_', ' ')}
+                    </span>
+                </div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onEditTask(task);
+                    }}
+                    className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50"
+                    title="Edit Task"
+                >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
             </div>
 
             <h3 className="font-semibold text-sm text-gray-800 mb-1.5 leading-snug">{task.title}</h3>

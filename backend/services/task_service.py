@@ -77,5 +77,17 @@ class TaskService:
     def get_task(self, task_id: int) -> Task | None:
         return self.repository.get_by_id(task_id)
 
+    def update_task(self, task_id: int, title: str, description: str, acceptance_criteria: str = None) -> Task:
+        task = self.repository.get_by_id(task_id)
+        if not task:
+            raise ValueError(f"Task {task_id} not found")
+        
+        task.title = title
+        task.description = description
+        task.acceptance_criteria = acceptance_criteria
+        # Optional: You could log a history entry for updates, but for MVP updating fields directly is fine.
+        
+        return self.repository.update(task)
+
     def get_task_history(self, task_id: int) -> list[TaskHistory]:
         return self.repository.get_history_by_task_id(task_id)
