@@ -1,13 +1,14 @@
 import { useState, useCallback } from 'react';
 import { Task, TaskStatus } from '../types/task';
 import { apiRequest } from '../api/client';
-import toast from 'react-hot-toast';
+import { useToast } from '../components/ToastProvider';
 
 export const useTasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const fetchTasks = useCallback(async (ideaId: string) => {
         try {
@@ -30,18 +31,18 @@ export const useTasks = () => {
                 method: 'POST',
             });
             setTasks(data || []);
-            toast.success('Tasks successfully generated!');
+            showToast('Tasks successfully generated!', 'success');
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Failed to generate tasks';
             setError(msg);
 
             // Look for specific API error signatures from the message mapping
             if (msg.includes('409') || msg.toLowerCase().includes('already generated')) {
-                toast.error('Tasks have already been generated for this idea (409 Conflict).');
+                showToast(msg, 'error'); // Requirement: "409 shows backend message"
             } else if (msg.includes('502') || msg.toLowerCase().includes('ai service')) {
-                toast.error('Failed to communicate with AI generation service (502 Bad Gateway).');
+                showToast('Failed to communicate with AI generation service', 'error'); // Requirement: "502 shows AI failure message"
             } else {
-                toast.error(msg);
+                showToast(msg, 'error');
             }
         } finally {
             setIsGenerating(false);
@@ -56,11 +57,10 @@ export const useTasks = () => {
                 body: JSON.stringify({ to_status: newStatus })
             });
             await fetchTasks(ideaId.toString());
-            // toast.success(`Task moved to ${newStatus.replace('_', ' ')}`);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Failed to transition task';
             setError(msg);
-            toast.error(msg);
+            showToast(msg, 'error');
             throw err;
         }
     };
