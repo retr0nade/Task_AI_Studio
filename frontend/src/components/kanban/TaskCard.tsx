@@ -1,15 +1,67 @@
-import React from 'react';
-import { Task } from '../../types/task';
+import React, { useState } from 'react';
+import { Task, TaskStatus } from '../../types/task';
 
 interface TaskCardProps {
     task: Task;
+    onTransition: (taskId: number, ideaId: number, newStatus: TaskStatus) => Promise<void>;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onTransition }) => {
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    const handleTransition = async (newStatus: TaskStatus) => {
+        setIsTransitioning(true);
+        try {
+            await onTransition(task.id, task.idea_id, newStatus);
+        } finally {
+            setIsTransitioning(false);
+        }
+    };
+
+    const renderTransitionButton = () => {
+        const btnClass = "mt-1 w-full text-xs font-semibold py-1.5 px-2 rounded-md transition-colors disabled:opacity-50";
+        switch (task.status) {
+            case 'draft':
+                return <button onClick={() => handleTransition('planned')} disabled={isTransitioning} className={`${btnClass} bg-blue-50 text-blue-600 hover:bg-blue-100`}>{isTransitioning ? 'Moving...' : 'Move to Planned'}</button>;
+            case 'planned':
+                return <button onClick={() => handleTransition('in_progress')} disabled={isTransitioning} className={`${btnClass} bg-yellow-50 text-yellow-600 hover:bg-yellow-100`}>{isTransitioning ? 'Starting...' : 'Start Progress'}</button>;
+            case 'in_progress':
+                return <button onClick={() => handleTransition('done')} disabled={isTransitioning} className={`${btnClass} bg-green-50 text-green-600 hover:bg-green-100`}>{isTransitioning ? 'Completing...' : 'Complete'}</button>;
+            case 'done':
+                return <button onClick={() => handleTransition('planned')} disabled={isTransitioning} className={`${btnClass} bg-gray-50 text-gray-500 hover:bg-gray-100`}>{isTransitioning ? 'Moving...' : 'Re-plan'}</button>;
+            default:
+                return null;
+        }
+    };
+
     return (
-        <div className="bg-white p-3 shadow-sm rounded border border-gray-200 cursor-pointer hover:shadow-md transition-shadow">
-            <h3 className="font-medium text-sm text-gray-800">{task.title}</h3>
-            <p className="text-xs text-gray-500 mt-1 truncate">{task.description}</p>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col group">
+            <div className="flex justify-between items-start mb-2">
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${task.is_ai_generated ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                    }`}>
+                    {task.is_ai_generated ? 'AI' : 'Manual'}
+                </span>
+                <span className="text-[10px] font-medium text-gray-400 capitalize bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                    {task.status.replace('_', ' ')}
+                </span>
+            </div>
+
+            <h3 className="font-semibold text-sm text-gray-800 mb-1.5 leading-snug">{task.title}</h3>
+            <p className="text-xs text-gray-500 mb-3 line-clamp-2 leading-relaxed">{task.description}</p>
+
+            {task.acceptance_criteria && (
+                <div className="bg-gray-50 rounded p-2.5 mb-3 border border-gray-100">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase mb-1.5 flex items-center gap-1.5 tracking-wide">
+                        <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Criteria
+                    </p>
+                    <p className="text-[11px] text-gray-600 line-clamp-2 leading-relaxed">{task.acceptance_criteria}</p>
+                </div>
+            )}
+
+            <div className="mt-auto pt-1">
+                {renderTransitionButton()}
+            </div>
         </div>
     );
 };

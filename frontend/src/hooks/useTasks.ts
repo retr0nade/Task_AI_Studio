@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Task } from '../types/task';
+import { Task, TaskStatus } from '../types/task';
 import { apiRequest } from '../api/client';
 import toast from 'react-hot-toast';
 
@@ -48,5 +48,22 @@ export const useTasks = () => {
         }
     };
 
-    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks };
+    const transitionTask = async (taskId: number, ideaId: number, newStatus: TaskStatus) => {
+        try {
+            setError(null);
+            await apiRequest<Task>(`/tasks/${taskId}/transition`, {
+                method: 'PATCH',
+                body: JSON.stringify({ to_status: newStatus })
+            });
+            await fetchTasks(ideaId.toString());
+            // toast.success(`Task moved to ${newStatus.replace('_', ' ')}`);
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Failed to transition task';
+            setError(msg);
+            toast.error(msg);
+            throw err;
+        }
+    };
+
+    return { tasks, loading, isGenerating, error, fetchTasks, generateTasks, transitionTask };
 };

@@ -4,9 +4,10 @@ import { Task, TaskStatus } from '../../types/task';
 
 interface KanbanBoardProps {
     tasks: Task[];
+    onTransition: (taskId: number, ideaId: number, newStatus: TaskStatus) => Promise<void>;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTransition }) => {
     // Group tasks strictly by status
     const groupedTasks = useMemo(() => {
         const groups: Record<TaskStatus, Task[]> = {
@@ -33,10 +34,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks }) => {
 
     return (
         <div className="flex-1 flex gap-4 overflow-x-auto pb-4 h-full">
-            <TaskColumn title="Draft" status="draft" tasks={groupedTasks.draft} />
-            <TaskColumn title="Planned" status="planned" tasks={groupedTasks.planned} />
-            <TaskColumn title="In Progress" status="in_progress" tasks={groupedTasks.in_progress} />
-            <TaskColumn title="Done" status="done" tasks={groupedTasks.done} />
+            <TaskColumn title="Draft" status="draft" tasks={groupedTasks.draft} onTransition={onTransition} />
+            <TaskColumn title="Planned" status="planned" tasks={groupedTasks.planned} onTransition={onTransition} />
+            <TaskColumn title="In Progress" status="in_progress" tasks={groupedTasks.in_progress} onTransition={onTransition} />
+            <TaskColumn title="Done" status="done" tasks={groupedTasks.done} onTransition={onTransition} />
         </div>
     );
 };

@@ -12,7 +12,7 @@ export const IdeaDetailPage: React.FC = () => {
     const [ideaLoading, setIdeaLoading] = useState<boolean>(true);
     const [ideaError, setIdeaError] = useState<string | null>(null);
 
-    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks } = useTasks();
+    const { tasks, loading: tasksLoading, isGenerating, fetchTasks, generateTasks, transitionTask } = useTasks();
 
     useEffect(() => {
         if (!id) return;
@@ -65,8 +65,8 @@ export const IdeaDetailPage: React.FC = () => {
                         onClick={() => id && generateTasks(id)}
                         disabled={isGenerating || tasksLoading}
                         className={`px-4 py-2 rounded-md font-medium transition-colors ${hasTasks
-                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                         {isGenerating ? 'Generating...' : hasTasks ? 'Regenerate Tasks' : 'Generate Tasks'}
@@ -78,11 +78,11 @@ export const IdeaDetailPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 min-h-0 bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col">
+            <div className="flex-1 min-h-0 bg-gray-100 rounded-lg flex flex-col">
                 {tasksLoading ? (
                     <div className="text-gray-500 p-4">Loading tasks...</div>
                 ) : hasTasks ? (
-                    <KanbanBoard tasks={tasks} />
+                    <KanbanBoard tasks={tasks} onTransition={transitionTask} />
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
                         <p>No tasks generated yet.</p>
