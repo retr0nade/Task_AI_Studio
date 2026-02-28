@@ -1,18 +1,29 @@
 import React from 'react';
-import { TaskStatus } from '../../types/task';
+import { TaskStatus, Task } from '../../types/task';
+import { TaskCard } from './TaskCard';
 
 interface TaskColumnProps {
     title: string;
     status: TaskStatus;
+    tasks: Task[];
 }
 
-export const TaskColumn: React.FC<TaskColumnProps> = ({ title, status }) => {
+export const TaskColumn: React.FC<TaskColumnProps> = ({ title, status, tasks }) => {
     return (
         <div className="w-80 min-w-80 bg-gray-100 rounded-lg p-3 flex flex-col gap-3" data-status={status}>
-            <h2 className="font-semibold text-gray-700">{title}</h2>
-            <div className="flex-1 min-h-[150px]">
-                {/* Task cards will be rendered here */}
-                <p className="text-sm text-gray-500 italic">No tasks yet.</p>
+            <div className="flex justify-between items-center mb-1">
+                <h2 className="font-semibold text-gray-700">{title}</h2>
+                <span className="bg-gray-200 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+                    {tasks.length}
+                </span>
+            </div>
+
+            <div className="flex-1 min-h-[150px] flex flex-col gap-2 overflow-y-auto pr-1">
+                {tasks.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic text-center mt-4">Empty</p>
+                ) : (
+                    tasks.map(task => <TaskCard key={task.id} task={task} />)
+                )}
             </div>
         </div>
     );
