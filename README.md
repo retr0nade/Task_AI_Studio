@@ -67,9 +67,9 @@ source venv/bin/activate      # macOS / Linux
 # Install dependencies
 pip install -r backend/requirements.txt
 
-# Set your Gemini API key
-$env:GEMINI_API_KEY="your-api-key-here"   # Windows PowerShell
-export GEMINI_API_KEY="your-api-key-here"  # macOS / Linux
+# Configure your Gemini API key (create the .env file)
+echo GEMINI_API_KEY=your-api-key-here > backend/.env    # Windows
+echo "GEMINI_API_KEY=your-api-key-here" > backend/.env  # macOS / Linux
 
 # Run database migrations
 flask --app backend.app db upgrade

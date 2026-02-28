@@ -122,11 +122,13 @@ def generate_tasks(idea_id):
         
         return success_response([{
              'id': t.id,
+             'idea_id': t.idea_id,
              'title': t.title,
              'description': t.description,
              'status': t.status,
              'acceptance_criteria': t.acceptance_criteria,
-             'is_ai_generated': t.is_ai_generated
+             'is_ai_generated': t.is_ai_generated,
+             'created_at': t.created_at.isoformat() if t.created_at else None
         } for t in tasks], 201)
     except AIValidationException as e:
         return error_response(f"AI generation failed: {str(e)}", 502)

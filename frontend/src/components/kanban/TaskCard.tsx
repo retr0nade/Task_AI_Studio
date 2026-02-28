@@ -11,6 +11,9 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, index, onSelectTask, onEditTask, onDeleteTask }) => {
+    // Guard: skip render if task data is stale/undefined (can happen during rapid drag sequences)
+    if (!task || task.id == null) return null;
+
     return (
         <Draggable draggableId={task.id.toString()} index={index}>
             {(provided, snapshot) => (
@@ -20,8 +23,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index, onSelectTask, o
                     {...provided.dragHandleProps}
                     onClick={() => onSelectTask(task)}
                     className={`bg-white p-4 rounded-xl border border-gray-200 flex flex-col group cursor-grab active:cursor-grabbing transition-all duration-200 ${snapshot.isDragging
-                            ? 'shadow-xl ring-2 ring-blue-400 rotate-1 scale-105'
-                            : 'shadow-sm hover:shadow-md'
+                        ? 'shadow-xl ring-2 ring-blue-400 rotate-1 scale-105'
+                        : 'shadow-sm hover:shadow-md'
                         }`}
                 >
                     {/* Header row: badges + action buttons */}

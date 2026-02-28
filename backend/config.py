@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 BASE_DIR = Path(__file__).parent.resolve()
 env_path = BASE_DIR / '.env'
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path=env_path, override=True)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
