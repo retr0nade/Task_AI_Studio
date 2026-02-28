@@ -54,7 +54,7 @@ export const useTasks = () => {
             setError(null);
             await apiRequest<Task>(`/tasks/${taskId}/transition`, {
                 method: 'PATCH',
-                body: JSON.stringify({ to_status: newStatus })
+                body: JSON.stringify({ status: newStatus })
             });
             await fetchTasks(ideaId.toString());
         } catch (err: unknown) {

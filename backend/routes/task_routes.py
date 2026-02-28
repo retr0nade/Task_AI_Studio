@@ -66,6 +66,22 @@ def get_tasks_for_idea(idea_id):
     except Exception as e:
         return error_response(str(e), 500)
 
+@bp.route('/<int:task_id>/history', methods=['GET'])
+def get_task_history(task_id):
+    task_service = current_app.container['task_service']
+    try:
+        history = task_service.get_task_history(task_id)
+        return success_response([{
+            'id': h.id,
+            'task_id': h.task_id,
+            'from_status': h.from_status,
+            'to_status': h.to_status,
+            'note': h.note,
+            'changed_at': h.changed_at.isoformat() if h.changed_at else None
+        } for h in history], 200)
+    except Exception as e:
+        return error_response(str(e), 500)
+
 @bp.route('/<int:task_id>/transition', methods=['PATCH'])
 def update_task_status(task_id):
     try:

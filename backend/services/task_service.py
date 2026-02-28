@@ -76,3 +76,6 @@ class TaskService:
 
     def get_task(self, task_id: int) -> Task | None:
         return self.repository.get_by_id(task_id)
+
+    def get_task_history(self, task_id: int) -> list[TaskHistory]:
+        return self.repository.get_history_by_task_id(task_id)

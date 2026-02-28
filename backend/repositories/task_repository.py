@@ -19,6 +19,9 @@ class TaskRepository:
     def get_by_idea_id(self, idea_id: int) -> list[Task]:
         return db.session.query(Task).filter(Task.idea_id == idea_id).order_by(Task.created_at.asc()).all()
 
+    def get_history_by_task_id(self, task_id: int) -> list[TaskHistory]:
+        return db.session.query(TaskHistory).filter(TaskHistory.task_id == task_id).order_by(TaskHistory.changed_at.desc()).all()
+
     def save_transition(self, task: Task, history: TaskHistory):
         db.session.add(history)
         db.session.commit()
