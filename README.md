@@ -53,7 +53,7 @@ Context-aware toast messages for every action — including actionable error mes
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/retr0nade/Task_AI_Studio.git
+git clone -b submission-final https://github.com/retr0nade/Task_AI_Studio.git
 cd Task_AI_Studio
 ```
 
