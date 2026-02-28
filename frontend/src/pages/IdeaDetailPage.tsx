@@ -123,7 +123,14 @@ export const IdeaDetailPage: React.FC = () => {
                 {tasksLoading ? (
                     <div className="text-gray-500 p-4">Loading tasks...</div>
                 ) : hasTasks ? (
-                    <KanbanBoard tasks={tasks} onTransition={transitionTask} onSelectTask={handleSelectTask} onNewTask={handleNewTask} onEditTask={handleEditTask} onDeleteTask={handleDeleteTask} />
+                    <KanbanBoard
+                        tasks={tasks}
+                        onTransition={transitionTask}
+                        onSelectTask={handleSelectTask}
+                        onNewTask={handleNewTask}
+                        onEditTask={handleEditTask}
+                        onDeleteTask={handleDeleteTask}
+                    />
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
                         <p>No tasks generated yet.</p>
