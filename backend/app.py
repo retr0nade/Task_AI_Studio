@@ -21,6 +21,11 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Import models so Flask-Migrate (Alembic) detects them during db migrate
+    from backend.models.idea import Idea
+    from backend.models.task import Task
+    from backend.models.task_history import TaskHistory
+
     # Initialize Flask extensions
     db.init_app(app)
     migrate.init_app(app, db)
