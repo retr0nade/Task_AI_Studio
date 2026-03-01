@@ -66,7 +66,7 @@ class TaskService:
                 new_tasks.append(task)
                 
             db.session.commit()
-            return new_tasks
+            return self.repository.get_by_idea_id(idea_id)
         except Exception as e:
             db.session.rollback()
             raise e

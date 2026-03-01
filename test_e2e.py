@@ -33,8 +33,9 @@ def run_tests():
     print("3. Generate tasks -> works? (Wait a few seconds for Gemini...)")
     status, resp = make_request("POST", f"/ideas/{idea_id}/generate-tasks")
     assert status == 201, f"Failed AI task generation: {status} {resp}"
-    ai_tasks = resp["data"]
-    print(f"   YES. Generated {len(ai_tasks)} AI tasks.\n")
+    all_returned_tasks = resp["data"]
+    ai_tasks = [t for t in all_returned_tasks if t["is_ai_generated"]]
+    print(f"   YES. Endpoint returned {len(all_returned_tasks)} total tasks, of which {len(ai_tasks)} are AI tasks.\n")
 
     print("4. Regeneration deletes only AI tasks?")
     status, resp = make_request("GET", f"/tasks/idea/{idea_id}")
