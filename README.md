@@ -31,6 +31,75 @@ Context-aware toast messages for every action — including actionable error mes
 
 ---
 
+## Architecture Overview
+
+The system is a decoupled full-stack application.
+
+The backend is built with Flask and follows a clean layered architecture using an application factory pattern. The layers are structured as follows:
+
+- **Routes**: Handle HTTP and request validation only.
+- **Services**: Contain business logic and orchestration.
+- **Domain**: Enforces invariants, including the task state machine.
+- **Repositories**: Isolate database access.
+- **Models**: Define relational structure using SQLAlchemy.
+- **AI Layer**: Completely isolated from persistence logic.
+
+This separation ensures that changes in one layer do not cascade unpredictably into others, which supports maintainability and change resilience.
+
+On the frontend, React with TypeScript provides strong type safety. All API responses follow a consistent structure, and strict TypeScript interfaces mirror backend models to enforce interface safety.
+
+### Domain Logic & Correctness
+
+The Kanban workflow is governed by an explicit state machine in the domain layer. The allowed transitions are:
+
+- Draft → Planned
+- Planned → In Progress
+- In Progress → Done
+- Done → Planned
+
+Invalid transitions return a `409 Conflict` response. Additionally, a task cannot move to Done unless it has acceptance criteria defined. This rule is enforced server-side, not in the frontend, ensuring correctness regardless of client behavior. Every valid transition generates a `TaskHistory` record, creating an immutable audit trail. The frontend cannot bypass these rules — even if an invalid drag-and-drop occurs, the backend rejects it and the UI rolls back the state, guaranteeing predictable system behavior.
+
+### AI Integration & Interface Safety
+
+AI integration is treated carefully, with AI output considered untrusted input. When Gemini returns a response, it must match a strict JSON schema:
+
+- It must contain a `"tasks"` array.
+- Each task must have exactly the required keys.
+- All fields must be strings.
+- No extra keys are allowed.
+- The number of tasks must be within bounds.
+
+If the response is malformed, the system retries once. If it fails again, the API returns a `502 Bad Gateway` response, clearly indicating an upstream AI issue. The AI layer does not access the database directly; it only generates content while the service layer handles validation and persistence. This ensures interface safety and protects system integrity from unpredictable model behavior.
+
+### Change Resilience & Regeneration Safety
+
+When regenerating tasks for an idea, only AI-generated tasks are replaced. Manually created tasks are preserved. This design ensures that user edits are never overwritten by AI. Business logic is isolated within the service layer, so adding new features does not require modifying unrelated components. This demonstrates change resilience — the system can evolve without destabilizing existing behavior.
+
+### Verification & Observability
+
+An automated end-to-end Python test suite verifies:
+
+- Idea creation and deletion
+- AI task generation
+- Valid transitions
+- Invalid transitions returning `409 Conflict`
+- Regeneration safety
+- Correct HTTP status codes
+
+All API responses follow a unified structure, and centralized error handling ensures failures are visible and diagnosable. This improves system observability and reliability.
+
+### Tradeoffs & Design Decisions
+
+- SQLite was chosen for development simplicity and reproducibility. The repository abstraction makes migrating to PostgreSQL straightforward.
+- Authentication was omitted to focus on architectural clarity and correctness rather than SaaS readiness.
+- Simple, readable code was prioritized over clever abstractions to maintain predictability.
+
+### Risks & Extensions
+
+Current limitations include SQLite's concurrency constraints and reliance on AI availability. Future extensions could include user authentication, PostgreSQL migration, prioritization, and multi-user support. The architecture is structured to support these additions without widespread refactoring.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
